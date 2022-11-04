@@ -25,13 +25,21 @@ const apiRoutes = require("./routes/apiRoutes");
 // });
 
 app.get("/", (req, res) => {
+  console.log("synchronous code");
+  throw new Error("some error occured");
   res.json({ message: "API running..." });
 });
 
+app.get("/a", (req, res, next) => {
+  setTimeout(() => {
+    console.log("asynchronous code");
+    // throw new Error("some error occured");
+    next(new Error("some error occured"));
+  }, 1000);
+  // res.send("Hello World!");
+});
+
 app.use("/api", apiRoutes);
-// app.get('api/products', (req, res) => {
-// 	res.send("Handling product routes.");
-// })
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
