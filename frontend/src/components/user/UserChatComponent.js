@@ -7,7 +7,7 @@ const UserChatComponent = () => {
       <label className="chat-btn" htmlFor="check">
         <i className="bi bi-chat-left-dots comment"></i>
         <span className="position-absolute top-0 start-10 translate-middle p-2 bg-danger border border-light rounded-circle"></span>
-        <i class="bi bi-x-circle close"></i>
+        <i className="bi bi-x-circle close"></i>
       </label>
       <div className="chat-wrapper">
         <div className="chat-header">
