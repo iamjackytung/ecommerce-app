@@ -1,5 +1,23 @@
+const Category = require("../models/CategoryModel");
 
-const getCategories = (req, res) => {
-    res.send("Handling category routes, e.g. get all categories")
-}
-module.exports = getCategories
+const getCategories = async (req, res, next) => {
+  try {
+    const categories = await Category.find({}).sort({ name: "asc" }).orFail();
+    res.json(categories);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const newCategory = async (req, res, next) => {
+  try {
+    // res.send(!!req.body);
+    const { category, dsds } = req.body;
+    if (!category) throw new Error("Category input is required");
+    res.send(category + dsds);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getCategories, newCategory };
