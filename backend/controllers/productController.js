@@ -1,5 +1,6 @@
 const Product = require("../models/ProductModel");
 const recordsPerPage = require("../config/pagination");
+const imageValidate = require("../utils/imageValidate");
 
 const getProducts = async (req, res, next) => {
   try {
@@ -166,12 +167,12 @@ const adminCreateProduct = async (req, res, next) => {
     product.count = count;
     product.price = price;
     product.category = category;
-    if (attributesTable.length > 0) {
+    if (attributesTable.length > 0)
       attributesTable.map((item) => {
         product.attrs.push(item);
       });
-    }
     await product.save();
+
     res.json({
       message: "product created",
       productId: product._id,
@@ -183,7 +184,7 @@ const adminCreateProduct = async (req, res, next) => {
 
 const adminUpdateProduct = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).orFail();
     const { name, description, count, price, category, attributesTable } =
       req.body;
     product.name = name || product.name;
@@ -196,11 +197,27 @@ const adminUpdateProduct = async (req, res, next) => {
       attributesTable.map((item) => {
         product.attrs.push(item);
       });
-    } else {
-      product.attrs = [];
-    }
+    } else product.attrs = [];
     await product.save();
-    res.json({ message: "product updated" });
+    res.json({
+      message: "product updated",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const adminUpload = async (req, res, next) => {
+  try {
+    if (!req.files || !!req.files.images === false)
+      return res.status(400).send("No files were uploaded.");
+
+    const validateResult = imageValidate(req.files.images);
+    if (validateResult.error) return res.status(400).send(validateResult.error);
+
+    if (Array.isArray(req.files.images))
+      res.send("You sent " + req.files.images.length + " images");
+    else res.send("You sent only one image");
   } catch (err) {
     next(err);
   }
@@ -214,4 +231,5 @@ module.exports = {
   adminDeleteProduct,
   adminCreateProduct,
   adminUpdateProduct,
+  adminUpload,
 };
