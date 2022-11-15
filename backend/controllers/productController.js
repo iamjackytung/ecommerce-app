@@ -215,9 +215,15 @@ const adminUpload = async (req, res, next) => {
     const validateResult = imageValidate(req.files.images);
     if (validateResult.error) return res.status(400).send(validateResult.error);
 
-    if (Array.isArray(req.files.images))
-      res.send("You sent " + req.files.images.length + " images");
-    else res.send("You sent only one image");
+    const path = require("path");
+    let imagesTable = [];
+
+    if (Array.isArray(req.files.images)) imagesTable = images;
+    else imagesTable.push(req.files.images);
+    for (let image of imagesTable) {
+      console.log(image);
+      console.log(path.extname(image.name));
+    }
   } catch (err) {
     next(err);
   }
