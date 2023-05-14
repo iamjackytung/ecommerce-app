@@ -78,7 +78,7 @@ const getProducts = async (req, res, next) => {
       sort = { score: { $meta: "textScore" } };
     }
 
-    if (queryCondition) {
+    if (queryCondition)
       query = {
         $and: [
           priceQueryCondition,
@@ -88,7 +88,6 @@ const getProducts = async (req, res, next) => {
           ...attrsQueryCondition,
         ],
       };
-    }
 
     const totalProducts = await Product.countDocuments(query);
     const products = await Product.find(query)
@@ -167,10 +166,11 @@ const adminCreateProduct = async (req, res, next) => {
     product.count = count;
     product.price = price;
     product.category = category;
-    if (attributesTable.length > 0)
+    if (attributesTable.length > 0) {
       attributesTable.map((item) => {
         product.attrs.push(item);
       });
+    }
     await product.save();
 
     res.json({
@@ -216,14 +216,31 @@ const adminUpload = async (req, res, next) => {
     if (validateResult.error) return res.status(400).send(validateResult.error);
 
     const path = require("path");
-    let imagesTable = [];
+    const { v4: uuidv4 } = require("uuid");
+    const uploadDirectory = path.resolve(
+      __dirname,
+      "../../frontend",
+      "public",
+      "images",
+      "products"
+    );
+    console.log(req.query.productId);
+    let product = await Product.findById(req.query.productId).orFail();
 
-    if (Array.isArray(req.files.images)) imagesTable = images;
+    let imagesTable = [];
+    if (Array.isArray(req.files.images)) imagesTable = req.files.images;
     else imagesTable.push(req.files.images);
+
     for (let image of imagesTable) {
-      console.log(image);
-      console.log(path.extname(image.name));
+      var fileName = uuidv4() + path.extname(image.name);
+      var uploadPath = uploadDirectory + "/" + fileName;
+      product.images.push({ path: "images/products/" + fileName });
+      image.mv(uploadPath, function (err) {
+        if (err) return res.status(500).send(err);
+      });
     }
+    await product.save();
+    return res.send("Files uploaded!");
   } catch (err) {
     next(err);
   }
