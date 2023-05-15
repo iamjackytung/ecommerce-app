@@ -234,13 +234,32 @@ const adminUpload = async (req, res, next) => {
     for (let image of imagesTable) {
       var fileName = uuidv4() + path.extname(image.name);
       var uploadPath = uploadDirectory + "/" + fileName;
-      product.images.push({ path: "images/products/" + fileName });
+      product.images.push({ path: "/images/products/" + fileName });
       image.mv(uploadPath, function (err) {
         if (err) return res.status(500).send(err);
       });
     }
     await product.save();
     return res.send("Files uploaded!");
+  } catch (err) {
+    next(err);
+  }
+};
+
+const adminDeleteProductImage = async (req, res, next) => {
+  try {
+    const imagePath = decodeURIComponent(req.params.imagePath);
+    const path = require("path");
+    const finalPath = path.resolve("../frontend/public") + imagePath;
+    const fs = require("fs");
+    fs.unlink(finalPath, (err) => {
+      if (err) res.status(500).send(err);
+    });
+    await Product.findOneAndUpdate(
+      { _id: req.params.productId },
+      { $pull: { images: { path: imagePath } } }
+    ).orFail();
+    return res.end();
   } catch (err) {
     next(err);
   }
@@ -255,4 +274,5 @@ module.exports = {
   adminCreateProduct,
   adminUpdateProduct,
   adminUpload,
+  adminDeleteProductImage,
 };
