@@ -168,7 +168,7 @@ const writeReview = async (req, res, next) => {
         },
       },
     ]);
-    const product = await Product.findbyId(req.params.productId).populate(
+    const product = await Product.findById(req.params.productId).populate(
       "reviews"
     );
     let prc = [...product.reviews];
