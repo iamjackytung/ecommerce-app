@@ -120,14 +120,20 @@ const OrderDetailsPageComponent = ({ getOrder, markAsDelivered }) => {
               <div className="d-grid gap-2">
                 <Button
                   size="lg"
-                  onClick={() => 
+                  onClick={() =>
                     markAsDelivered(id)
-                    .then((res) => {
-                       if (res) {
-                          setIsDelivered(true); 
-                       } 
-                    })
-                    .catch(er => console.log(er.response.data.message ? er.response.data.message : er.response.data))
+                      .then((res) => {
+                        if (res) {
+                          setIsDelivered(true);
+                        }
+                      })
+                      .catch((er) =>
+                        console.log(
+                          er.response.data.message
+                            ? er.response.data.message
+                            : er.response.data
+                        )
+                      )
                   }
                   disabled={buttonDisabled}
                   variant="danger"
@@ -145,4 +151,3 @@ const OrderDetailsPageComponent = ({ getOrder, markAsDelivered }) => {
 };
 
 export default OrderDetailsPageComponent;
-
