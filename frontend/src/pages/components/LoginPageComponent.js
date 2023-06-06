@@ -1,9 +1,16 @@
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Spinner from "react-bootstrap/Spinner";
 const LoginPageComponent = ({ loginUserApiRequest }) => {
   const [validated, setValidated] = useState(false);
+  const [loginUserResponseState, setLoginUserResponseState] = useState({
+    success: "",
+    error: "",
+    loading: false,
+  });
+
+  const navigate = useNavigate();
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -14,13 +21,22 @@ const LoginPageComponent = ({ loginUserApiRequest }) => {
     const doNotLogout = form.doNotLogout.checked;
     if (event.currentTarget.checkValidity() === true && email && password) {
       loginUserApiRequest(email, password, doNotLogout)
-        .then((res) => console.log(res))
+        .then((res) => {
+          setLoginUserResponseState({
+            success: res.success,
+            loading: false,
+            error: "",
+          });
+          if (res.success === "user logged in" && !res.userLoggedIn.isAdmin)
+            navigate("/user", { replace: true });
+          else navigate("/admin/orders", { replace: true });
+        })
         .catch((er) =>
-          console.log(
-            er.response.data.message
+          setLoginUserResponseState({
+            error: er.response.data.message
               ? er.response.data.message
-              : er.response.data
-          )
+              : er.response.data,
+          })
         );
     }
 
@@ -66,16 +82,27 @@ const LoginPageComponent = ({ loginUserApiRequest }) => {
             </Row>
 
             <Button variant="primary" type="submit">
-              <Spinner
-                as="span"
-                animation="border"
-                size="sm"
-                role="status"
-                aria-hidden="true"
-              />
+              {loginUserResponseState &&
+              loginUserResponseState.loading === true ? (
+                <Spinner
+                  as="span"
+                  animation="border"
+                  size="sm"
+                  role="status"
+                  aria-hidden="true"
+                />
+              ) : (
+                ""
+              )}
               Login
             </Button>
-            <Alert show={true} variant="danger">
+            <Alert
+              show={
+                loginUserResponseState &&
+                loginUserResponseState.error === "wrong credentials"
+              }
+              variant="danger"
+            >
               Wrong credentials
             </Alert>
           </Form>
